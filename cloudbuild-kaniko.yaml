@@ -4,5 +4,6 @@ steps:
   - --cache=true
   - --cache-ttl=168h
   - --destination=${_REGION}-docker.pkg.dev/${PROJECT_ID}/registry/web:latest
+  - --dockerfile=Dockerfile-multi
 substitutions:
   _REGION: us-central1
