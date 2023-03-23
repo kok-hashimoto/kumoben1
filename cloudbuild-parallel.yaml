@@ -1,0 +1,32 @@
+steps:
+- name: golang:1.20
+  id: go-test
+  waitFor: ['-']
+  entrypoint: go
+  args:
+  - test
+- name: golang:1.20
+  id: staticcheck
+  waitFor: ['-']
+  script: |
+    go install honnef.co/go/tools/cmd/staticcheck@latest
+    staticcheck ./...
+- name: hadolint/hadolint:latest-debian
+  id: hadolint
+  waitFor: ['-']
+  entrypoint: hadolint
+  args:
+  - Dockerfile
+- name: gcr.io/kaniko-project/executor:latest
+  id: kaniko
+  waitFor:
+  - go-test
+  - staticcheck
+  - hadolint
+  args:
+  - --cache=true
+  - --cache-ttl=168h
+  - --destination=${_REGION}-docker.pkg.dev/${PROJECT_ID}/registry/web:latest
+  - --dockerfile=Dockerfile-multi
+substitutions:
+  _REGION: us-central1
